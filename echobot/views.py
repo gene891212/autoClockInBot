@@ -87,7 +87,3 @@ def handle_message(event):
         text = f'Hi Hi {profile.display_name}, I\'m writing your information into database. You can not reject.'
         push_sticker_message(event, text, '11537', '52002753')
 
-
-# {"mode": "active", "postback": {"data": "clockIn"}, "replyToken": "02c2fc5a1c9844789ef9c4226d29153d", 
-#  "source": {"type": "user", "userId": "Ub1eff16cb01f4343694423cba8c74e52"}, 
-#  "timestamp": 1603863026336, "type": "postback"}
