@@ -20,15 +20,10 @@ from selenium.common.exceptions import NoSuchElementException
 line_bot_api = LineBotApi(os.environ['CHANNEL_ACCESS_TOKEN'])
 handler = WebhookHandler(os.environ['CHANNEL_SECRET'])
 
-# rich menu
-rich_menu_id = line_bot_api.create_rich_menu(rich_menu=init_rich_menu())
-with open('richmenu.png', 'rb') as f:
-    line_bot_api.set_rich_menu_image(rich_menu_id, 'image/png', f)
-line_bot_api.set_default_rich_menu(rich_menu_id)
+line_bot_api.set_default_rich_menu(init_rich_menu())
 
 # db
 all_user_id = list(map(lambda entry: entry.user_id, UserInformation.objects.all()))
-
 
 @csrf_exempt
 @require_POST
@@ -59,22 +54,29 @@ def handle_message(event):
 def handle_message(event):
     # print(event)
     # print(event.source.user_id)
+    user_detail = UserInformation.objects.get(user_id=event.source.user_id)
+
     if event.postback.data == 'check':
-        push_sticker_message(event, 'Linebot is Online.', '11537', '52002746')
+        push_sticker_message(event, f'Hi, {user_detail.user_name}.\nLinebot is Online.', '11537', '52002746')
     elif event.postback.data == 'clockIn':
         # line_bot_api.push_message(
         #     event.source.user_id,
         #     tempConfirmTemplate()
         # )
         reply_message(event, 'ClockIn Now...')
-        user_detail = UserInformation.objects.get(user_id=event.source.user_id)
         try:
-            echo = ClockIn(event).clockIn(user_detail.email_account, user_detail.email_password)
+            echo, image_link = ClockIn(event).clockIn(user_detail.email_account, user_detail.email_password)
         except NoSuchElementException as e:
             push_message(event, e)
         else:
+            line_bot_api.push_message(
+                event.source.user_id,
+                ImageSendMessage(
+                    original_content_url=image_link,
+                    preview_image_url=image_link
+                )
+            )
             push_sticker_message(event, echo, '11537', '52002734')
-        # line_bot_api.broadcast(TextSendMessage(text='說個話吧'))
     else:
         pass
 

@@ -118,3 +118,8 @@ media/
 # **/migrations/**
 # !**/migrations
 # !**/migrations/__init__.py
+
+start.sh
+Dockerfile
+img/
+

@@ -3,17 +3,21 @@ from linebot import LineBotApi
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
 import time
 import re
 import os
 
+import pyimgur
+
+CLIENT_ID = os.environ['IMGUR_CLIENT_ID']
 line_bot_api = LineBotApi(os.environ['CHANNEL_ACCESS_TOKEN'])
 
 
 class ClockIn():
     chrome_options = Options()
-    # chrome_options.add_argument('--headless')
+    chrome_options.add_argument('--headless')
     # chrome_options.add_argument('--start-maximized')  # for windows
     # chrome_options.add_argument('--kiosk')            # for linux or mac
     def __init__(self, event):
@@ -24,8 +28,20 @@ class ClockIn():
             while(chrome.current_url != url):
                 pass
             time.sleep(3)
+        def get_screenshot():
+            localtime = time.strftime('%Y-%m-%d_%H-%M-%S')
+            img_path = f'img/{localtime}.png'
+            chrome.save_screenshot(img_path)
+            im = pyimgur.Imgur(CLIENT_ID)
+            image = im.upload_image(img_path, title="Uploaded with PyImgur")
+            return image.link
 
-        chrome = webdriver.Chrome('./chromedriver', chrome_options=self.chrome_options)
+        chrome = webdriver.Remote(
+            command_executor='http://127.0.0.1:4444/wd/hub',
+            desired_capabilities=DesiredCapabilities.CHROME
+        )
+        # chrome = webdriver.Chrome('./chromedriver', chrome_options=self.chrome_options)
+        
         chrome.get("https://dpqqa.com")
         # login by microsoft
         confirmUrl('https://dpqqa.com/authentication/login')
@@ -46,22 +62,24 @@ class ClockIn():
         chrome.find_element_by_id('idSIButton9').click()
         time.sleep(3)
 
-        # clock in
+        # clock in button
         chrome.switch_to_window(chrome.window_handles[0])
         time.sleep(1)
         confirmUrl('https://dpqqa.com/')
         chrome.find_element_by_xpath('/html/body/app-root/app-header/mat-toolbar/div[2]/button[4]').click()
 
-        confirmUrl(re.search(r'https://dpqqa.com/clock/\d+', chrome.current_url).group())
-        chrome.find_element_by_xpath('/html/body/app-root/app-clock/div/div/div[1]/div/button[1]').click()
+        # clock in
+        # confirmUrl(re.search(r'https://dpqqa.com/clock/\d+', chrome.current_url).group())
+        # chrome.find_element_by_xpath('/html/body/app-root/app-clock/div/div/div[1]/div/button[1]').click()
         time.sleep(3)
 
+        image_link = get_screenshot()
         local_time = chrome.find_element_by_xpath('/html/body/app-root/app-clock/div/div/div[2]/div/table/tbody/tr[1]/td[1]').text
         status = chrome.find_element_by_xpath('/html/body/app-root/app-clock/div/div/div[2]/div/table/tbody/tr[1]/td[2]').text
         account_name = chrome.find_element_by_xpath('//html/body/app-root/app-header/mat-toolbar/div[4]/button/span').text
         
         chrome.close()
-        return f'{account_name}\nThe Lastest:\n{local_time} ({status})'
+        return f'{account_name}\nThe Lastest:\n{local_time} ({status})', image_link
 
 # rich menu
 def init_rich_menu():
@@ -87,7 +105,11 @@ def init_rich_menu():
             )
         ]
     )
-    return rich_menu_to_create
+    rich_menu_id = line_bot_api.create_rich_menu(rich_menu=rich_menu_to_create)
+    with open('richmenu.png', 'rb') as f:
+        line_bot_api.set_rich_menu_image(rich_menu_id, 'image/png', f)
+    return rich_menu_id
+
 
 def push_message(event, text):
     line_bot_api.push_message(
