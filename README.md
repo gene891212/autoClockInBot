@@ -1,4 +1,4 @@
-# mydjangoLinebot
+# autoCLockInBot
 ---
 Try to use linebot api on django
 
