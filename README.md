@@ -11,4 +11,5 @@ export CHANNEL_SECRET=''
 
 # Django Config
 export SECRET_KEY=''
+export IMGUR_CLIENT_ID=''
 ```

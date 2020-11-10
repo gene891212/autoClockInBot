@@ -9,15 +9,13 @@ import time
 import re
 import os
 
-import pyimgur
 
-CLIENT_ID = os.environ['IMGUR_CLIENT_ID']
 line_bot_api = LineBotApi(os.environ['CHANNEL_ACCESS_TOKEN'])
 
 
 class ClockIn():
     chrome_options = Options()
-    chrome_options.add_argument('--headless')
+    # chrome_options.add_argument('--headless')
     # chrome_options.add_argument('--start-maximized')  # for windows
     # chrome_options.add_argument('--kiosk')            # for linux or mac
     def __init__(self, event):
@@ -32,15 +30,14 @@ class ClockIn():
             localtime = time.strftime('%Y-%m-%d_%H-%M-%S')
             img_path = f'img/{localtime}.png'
             chrome.save_screenshot(img_path)
-            im = pyimgur.Imgur(CLIENT_ID)
-            image = im.upload_image(img_path, title="Uploaded with PyImgur")
-            return image.link
+            return img_path
 
         chrome = webdriver.Remote(
             command_executor='http://127.0.0.1:4444/wd/hub',
+            # command_executor='http://172.18.0.2:4444/wd/hub',     # in docker
             desired_capabilities=DesiredCapabilities.CHROME
         )
-        # chrome = webdriver.Chrome('./chromedriver', chrome_options=self.chrome_options)
+        # chrome = webdriver.Chrome('./chromedriver', chrome_options=self.chrome_options)   # in local
         
         chrome.get("https://dpqqa.com")
         # login by microsoft
@@ -73,13 +70,13 @@ class ClockIn():
         # chrome.find_element_by_xpath('/html/body/app-root/app-clock/div/div/div[1]/div/button[1]').click()
         time.sleep(3)
 
-        image_link = get_screenshot()
+        img_path = get_screenshot()
         local_time = chrome.find_element_by_xpath('/html/body/app-root/app-clock/div/div/div[2]/div/table/tbody/tr[1]/td[1]').text
         status = chrome.find_element_by_xpath('/html/body/app-root/app-clock/div/div/div[2]/div/table/tbody/tr[1]/td[2]').text
         account_name = chrome.find_element_by_xpath('//html/body/app-root/app-header/mat-toolbar/div[4]/button/span').text
         
         chrome.close()
-        return f'{account_name}\nThe Lastest:\n{local_time} ({status})', image_link
+        return f'{account_name}\nThe Lastest:\n{local_time} ({status})', img_path
 
 # rich menu
 def init_rich_menu():

@@ -4,6 +4,8 @@ from django.shortcuts import render
 # Create your views here.
 import requests
 import os
+import pyimgur
+
 from echobot.myFunction import *
 from echobot.models import UserInformation
 
@@ -17,6 +19,7 @@ from linebot.models import *
 
 from selenium.common.exceptions import NoSuchElementException
 
+CLIENT_ID = os.environ['IMGUR_CLIENT_ID']
 line_bot_api = LineBotApi(os.environ['CHANNEL_ACCESS_TOKEN'])
 handler = WebhookHandler(os.environ['CHANNEL_SECRET'])
 
@@ -65,27 +68,30 @@ def handle_message(event):
         # )
         reply_message(event, 'ClockIn Now...')
         try:
-            echo, image_link = ClockIn(event).clockIn(user_detail.email_account, user_detail.email_password)
+            echo, img_path = ClockIn(event).clockIn(user_detail.email_account, user_detail.email_password)
         except NoSuchElementException as e:
             push_message(event, e)
         else:
+            push_sticker_message(event, echo, '11537', '52002734')
+
+            im = pyimgur.Imgur(CLIENT_ID)
+            image = im.upload_image(img_path, title="Uploaded with PyImgur")
             line_bot_api.push_message(
                 event.source.user_id,
                 ImageSendMessage(
-                    original_content_url=image_link,
-                    preview_image_url=image_link
+                    original_content_url=image.link,
+                    preview_image_url=image.link
                 )
             )
-            push_sticker_message(event, echo, '11537', '52002734')
     else:
         pass
 
 @handler.add(FollowEvent)
 def handle_message(event):
-    print(event)
+    # print(event)
+    profile = line_bot_api.get_profile(event.source.user_id)
+    text = f'Hi Hi {profile.display_name}, I\'m writing your information into database. You can not reject.'
+    push_sticker_message(event, text, '11537', '52002753')
     if event.source.user_id not in all_user_id:
-        profile = line_bot_api.get_profile(event.source.user_id)
         UserInformation(user_id=profile.user_id, user_name=profile.display_name).save()
-        text = f'Hi Hi {profile.display_name}, I\'m writing your information into database. You can not reject.'
-        push_sticker_message(event, text, '11537', '52002753')
 
