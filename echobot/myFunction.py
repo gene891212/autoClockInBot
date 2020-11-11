@@ -15,7 +15,7 @@ line_bot_api = LineBotApi(os.environ['CHANNEL_ACCESS_TOKEN'])
 
 class ClockIn():
     chrome_options = Options()
-    # chrome_options.add_argument('--headless')
+    chrome_options.add_argument('--headless')
     # chrome_options.add_argument('--start-maximized')  # for windows
     # chrome_options.add_argument('--kiosk')            # for linux or mac
     def __init__(self, event):
@@ -66,8 +66,8 @@ class ClockIn():
         chrome.find_element_by_xpath('/html/body/app-root/app-header/mat-toolbar/div[2]/button[4]').click()
 
         # clock in
-        # confirmUrl(re.search(r'https://dpqqa.com/clock/\d+', chrome.current_url).group())
-        # chrome.find_element_by_xpath('/html/body/app-root/app-clock/div/div/div[1]/div/button[1]').click()
+        confirmUrl(re.search(r'https://dpqqa.com/clock/\d+', chrome.current_url).group())
+        chrome.find_element_by_xpath('/html/body/app-root/app-clock/div/div/div[1]/div/button[1]').click()
         time.sleep(3)
 
         img_path = get_screenshot()
