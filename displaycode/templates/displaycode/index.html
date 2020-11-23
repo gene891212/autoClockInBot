@@ -1,16 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-{% load static %}
-<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.2/styles/atom-one-dark-reasonable.min.css">
-<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.2/highlight.min.js"></script>
-<body>
+{% extends "base.html" %}
+
+{% block content %}
+    {% load static %}
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.2/styles/atom-one-dark-reasonable.min.css">
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.2/highlight.min.js"></script>
     {% for title, text in contents %}
-        <h1>{{ title }}</h1>
+        <h1 id='{{ forloop.counter }}'>{{ title }}</h1>
         <div>
             <pre><code class="python">
                 {{ text }}
@@ -18,5 +13,10 @@
             <script>hljs.initHighlightingOnLoad();</script>
         </div>
     {% endfor %}
-</body>
-</html>
+{% endblock %}
+
+{% block filename %}
+    {% for i in titles %}
+        <li><a href="#{{ forloop.counter }}">{{ i }}</a></li>
+    {% endfor %}
+{% endblock %}

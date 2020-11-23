@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block disease %}
+<li><a href="#_1">CUI</a></li>
+<li><a href="#_2">定義</a></li>
+<li><a href="#_3">症狀</a></li>
+<li><a href="#_4">病因</a></li>
+<li><a href="#_5">診斷</a></li>
+<li><a href="#_6">治療和藥物參考</a></li>
+<li><a href="#_7">參考資料</a></li> 
+{% endblock %}
+
+{% block content %}
+    <h1>{{ disease.title }}</h1>
+    {{ disease.body|safe }}
+{% endblock %}

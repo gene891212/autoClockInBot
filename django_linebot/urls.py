@@ -25,8 +25,8 @@ urlpatterns = [
     path('callback/', include('echobot.urls')),
 
     path('displaycode/', include('displaycode.urls')),
-    path('', RedirectView.as_view(url='/displaycode/')),
-    # path('', include('displaycode.urls')),
+    path('', RedirectView.as_view(url='/mdblog/')),
 
+    path('mdblog/', include('mdblog.urls'))
 
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

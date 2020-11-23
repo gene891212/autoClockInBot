@@ -41,6 +41,7 @@ INSTALLED_APPS = [
 
     'echobot.apps.EchobotConfig',
     'displaycode.apps.DisplaycodeConfig',
+    'mdblog.apps.MdblogConfig'
 ]
 
 MIDDLEWARE = [
@@ -58,7 +59,7 @@ ROOT_URLCONF = 'django_linebot.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
